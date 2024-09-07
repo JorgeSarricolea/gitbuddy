@@ -3,6 +3,8 @@
 import subprocess
 import os
 import sys
+import tempfile
+import time
 
 # Define color variables
 RED = '\033[31m'
@@ -11,6 +13,7 @@ YELLOW = '\033[33m'
 BLUE = '\033[34m'
 MAGENTA = '\033[35m'
 CYAN = '\033[36m'
+WHITE = '\033[37m'
 RESET = '\033[0m'
 
 # Function to run shell commands and return output
@@ -19,8 +22,6 @@ def run_command(command, capture_output=False):
         result = subprocess.run(command, shell=True, text=True, capture_output=capture_output, check=True)
         return result.stdout.strip() if capture_output else None
     except subprocess.CalledProcessError as e:
-        if "git rev-parse" in command:  # Allow failure for this specific command
-            return None  # Indicate the command failed without exiting
         print(f"{RED}❌ Error: {e}{RESET}")
         sys.exit(1)
 
@@ -33,56 +34,100 @@ def is_git_repository():
     result = run_command("git rev-parse --is-inside-work-tree", capture_output=True)
     return result is not None
 
-# Function to get a multi-line commit message
-def get_multiline_commit_message():
-    print("Please enter your commit message. Use Shift + Enter for a new line. Press Enter twice to finish.\n")
-    print(f"{MAGENTA}💡 Commit:{RESET}\n")
-    lines = []
-    while True:
-        try:
-            line = input()
-            if line == "":
-                break  # Stop input when user presses enter on an empty line
-            lines.append(line)
-        except EOFError:
-            break
-    return "\n".join(lines)
+# Create a commit message template
+def create_commit_template():
+    template = (
+        ""
+    )
+    # Create a temporary file with the template
+    temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.tmp')
+    temp_file.write(template)
+    temp_file.close()
+    return temp_file.name
 
+# Replace COMMIT_EDITMSG with custom template
+def replace_commit_message_with_template(template_file):
+    git_commit_file = os.path.join(".git", "COMMIT_EDITMSG")
+    with open(template_file, 'r') as temp_file, open(git_commit_file, 'w') as commit_file:
+        commit_file.write(temp_file.read())
+
+# Print the commit message after the commit is done with color differentiation
+def print_commit_message():
+    git_commit_file = os.path.join(".git", "COMMIT_EDITMSG")
+    with open(git_commit_file, 'r') as commit_file:
+        commit_message = commit_file.read()
+
+        # Split the commit message into lines
+        lines = commit_message.splitlines()
+
+        # Print the first line in one color
+        if lines:
+            print(f"\n{MAGENTA}💡 Commit:{RESET}\n")
+            print(f"{GREEN}{lines[0]}{RESET}")  # First line in green
+
+        # Print the rest of the lines in another color
+        if len(lines) > 1:
+            for line in lines[1:]:
+                print(f"{YELLOW}{line}{RESET}")  # Rest of the lines in yellow
+
+# Remove any existing swap files
+def remove_swap_files():
+    swap_file_path = os.path.join(".git", ".COMMIT_EDITMSG.swp")
+    if os.path.exists(swap_file_path):
+        os.remove(swap_file_path)
+        print(f"{GREEN}✅ Removed swap file: {swap_file_path}{RESET}")
 
 # Main script
 def main():
     clear_screen()
     print(f"{BLUE}🚀 Welcome to the Git Buddy!{RESET}\n")
-    
+    time.sleep(1)
+
     # Check if we're in a Git repository
     if not is_git_repository():
         print(f"{RED}❌ No Git repository found in the current directory.{RESET}\n")
-        yn = input("Do you want to initialize a new Git repository? (y/n): ").strip().lower()
-        if yn in ['y', 'yes']:
-            print(f"\n{GREEN}🚀 Initializing new Git repository...{RESET}\n")
-            run_command("git init")
-        else:
-            print(f"\n{YELLOW}👋 Exiting script as no Git repository was found.{RESET}")
-            sys.exit(1)
+        sys.exit(1)
 
     # Check for changes
     status_output = run_command("git status --porcelain", capture_output=True)
+
     if not status_output:
-        print(f"\n{GREEN}✅ No changes detected. Nothing to commit.{RESET}")
+        # No changes detected, exit the script immediately
+        print(f"{GREEN}✅ No changes detected. Exiting script.{RESET}")
         sys.exit(0)
 
-    # Prompt for commit message (multi-line input)
-    commit_message = get_multiline_commit_message()
-    if not commit_message:
-        print(f"\n{RED}❌ Error: Commit message is required.{RESET}")
-        sys.exit(1)
-
-    # Add and commit changes
-    print(f"{CYAN}----------------------------------------------------{RESET}")
+    # Add changes if detected
     run_command("git add .")
-    run_command(f"git commit -m \"{commit_message}\"")
+
+    # Inform the user about how to save and close nano
+    print(f"{YELLOW}Opening nano to write your commit message.{RESET}")
+    print(f"{YELLOW}Use 'Ctrl+O' to save and 'Ctrl+X' to exit nano.{RESET}")
+    time.sleep(3)
+
+    # Create a commit message template
+    commit_template = create_commit_template()
+
+    # Replace the default COMMIT_EDITMSG with the custom template
+    replace_commit_message_with_template(commit_template)
+
+    # Remove any existing swap files to prevent issues
+    remove_swap_files()
+
+    # Open nano with the replaced commit message
+    print(f"\n{CYAN}----------------------------------------------------{RESET}")
+    run_command("nano .git/COMMIT_EDITMSG")
+
+    # Perform the commit without reopening the editor
+    run_command("git commit --file=.git/COMMIT_EDITMSG --no-edit")
+
+    # Print the commit message after the commit is done
+    print_commit_message()
+
     print(f"\n{GREEN}📦 Changes saved!{RESET}")
     print(f"{CYAN}----------------------------------------------------{RESET}")
+
+    # Delete the temporary template file after commit
+    os.remove(commit_template)
 
     # Ask if user wants to pull
     while True:
