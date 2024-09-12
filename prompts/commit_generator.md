@@ -1,4 +1,6 @@
-**Prompt:**
+Aquí tienes una versión mejorada de tu prompt, que incluye la opción de agregar un ID de ticket y una URL si se proporcionan, o omitirlos si no están presentes:
+
+---
 
 Hello! I need your help to generate a Conventional Commit message. Please follow these guidelines:
 
@@ -24,7 +26,17 @@ Hello! I need your help to generate a Conventional Commit message. Please follow
   - What was done in detail.
   - How this affects the codebase.
 
-### 2. **Examples:**
+### 2. **Optional Ticket Information:**
+
+- If I provide a ticket ID and a related URL, include this information at the end of the detailed section using the following format:
+
+  ```
+  - Related Ticket [#TicketID](URL)
+  ```
+
+  This will help reference the specific issue being addressed. If no ticket ID and URL are provided, exclude this section.
+
+### 3. **Examples:**
 
 #### Example 1: Adding a Feature
 
@@ -72,20 +84,35 @@ docs(readme): update setup instructions and examples
     - Clarified example usage and corrected typos.
 ```
 
-### 3. **Detailed Instructions:**
+#### Example with a Notion Ticket ID
+
+```
+fix(toast): allow multiple toast notifications throughout the app
+
+    - Fixed the issue where toast notifications were only displayed once and did not appear on subsequent actions.
+    - Changed the "preventDuplicates" property from true to false to allow toast notifications to display even when the data is the same or similar.
+    - Related Ticket [#732](https://www.notion.so/toast-error-123)
+```
+
+### 4. **Detailed Instructions:**
 
 - Start with the commit type and, if applicable, a scope in parentheses.
 - The short description should clearly describe what was changed and be within 72 characters.
 - Use the third section for additional details if necessary, explaining the why and how of the change.
+- If a ticket ID and URL are provided, append them to the commit message with the format shown above. If not, this section will be omitted.
 - Write in present tense and avoid passive voice.
 - Ensure proper capitalization and punctuation.
 
-### 4. **Additional Notes:**
+### 5. **Additional Notes:**
 
 - Do **not** include `git commit -m`. Provide only the commit message text.
 - Avoid phrases like "this commit does" or "in this commit."
 - Be precise and specific to ensure clarity.
 
-### 5. **Language Output\_:**
+### 6. **Language Output**:
 
 - Always write the Conventional Commit in English.
+
+---
+
+Este prompt ahora incluye la opción de agregar un ID de ticket y URL, o excluirlos si no están disponibles, lo que proporciona flexibilidad en el formato del commit.
