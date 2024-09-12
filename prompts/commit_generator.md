@@ -1,7 +1,3 @@
-Aquí tienes una versión mejorada de tu prompt, que incluye la opción de agregar un ID de ticket y una URL si se proporcionan, o omitirlos si no están presentes:
-
----
-
 Hello! I need your help to generate a Conventional Commit message. Please follow these guidelines:
 
 ### 1. **Commit Message Structure:**
