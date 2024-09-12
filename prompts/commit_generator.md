@@ -112,7 +112,3 @@ fix(toast): allow multiple toast notifications throughout the app
 ### 6. **Language Output**:
 
 - Always write the Conventional Commit in English.
-
----
-
-Este prompt ahora incluye la opción de agregar un ID de ticket y URL, o excluirlos si no están disponibles, lo que proporciona flexibilidad en el formato del commit.
