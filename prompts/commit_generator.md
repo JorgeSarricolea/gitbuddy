@@ -98,13 +98,35 @@ fix(toast): allow multiple toast notifications throughout the app
 - If a ticket ID and URL are provided, append them to the commit message with the format shown above. If not, this section will be omitted.
 - Write in present tense and avoid passive voice.
 - Ensure proper capitalization and punctuation.
+- If a variable, function, or reserved word needs to be highlighted, use a normal apostrophe (') instead of backticks (`). For example, this is incorrect:
+  
+```
+feat(user): create handleUpdateUser use case
 
-### 5. **Additional Notes:**
+    - Implements `handleUpdateUser` to update user data based on user ID from storage.
+    - Returns the updated user data if successful; returns null if user ID is missing or an error occurs.
+```
+
+  This is correct:
+```
+feat(user): create handleUpdateUser use case
+
+    - Implements 'handleUpdateUser' to update user data based on user ID from storage.
+    - Returns the updated user data if successful; returns null if user ID is missing or an error occurs.
+```
+
+### 5. **Handling Code Blocks:**
+
+- If I provide a code block, identify the type of change (e.g., `fix`, `refactor`, etc.) based on the differences in the code.
+- If I provide additional context or a description (e.g., "Se creó el Header"), interpret that to inform the commit message.
+
+### 6. **Additional Notes:**
 
 - Do **not** include `git commit -m`. Provide only the commit message text.
 - Avoid phrases like "this commit does" or "in this commit."
 - Be precise and specific to ensure clarity.
+- Always return only the Conventional Commit message and nothing else.
 
-### 6. **Language Output**:
+### 7. **Language Output:**
 
 - Always write the Conventional Commit in English.
